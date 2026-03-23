@@ -275,6 +275,26 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5105739270100195971, guid: af5b36521fab19a428d5c435c994f183,
         type: 3}
+    - target: {fileID: 6062652630926106765, guid: 16074ce928b0558829296ab0d9ccadf3,
+        type: 3}
+      propertyPath: _showLeftEye
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6062652630926106765, guid: 16074ce928b0558829296ab0d9ccadf3,
+        type: 3}
+      propertyPath: _showRightEye
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6062652630926106765, guid: 16074ce928b0558829296ab0d9ccadf3,
+        type: 3}
+      propertyPath: _showLeftEyebrow
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6062652630926106765, guid: 16074ce928b0558829296ab0d9ccadf3,
+        type: 3}
+      propertyPath: _showRightEyebrow
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7273100862690186830, guid: 16074ce928b0558829296ab0d9ccadf3,
         type: 3}
       propertyPath: m_RootOrder

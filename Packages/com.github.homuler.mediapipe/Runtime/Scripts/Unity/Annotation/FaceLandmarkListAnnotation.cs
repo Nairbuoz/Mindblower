@@ -20,6 +20,14 @@ namespace Mediapipe.Unity
     [SerializeField] private PointListAnnotation _landmarkListAnnotation;
     [SerializeField] private ConnectionListAnnotation _connectionListAnnotation;
 
+    [Header("Feature Toggles")]
+    [SerializeField] private bool _showFaceOval = true;
+    [SerializeField] private bool _showLeftEye = true;
+    [SerializeField] private bool _showRightEye = true;
+    [SerializeField] private bool _showLeftEyebrow = true;
+    [SerializeField] private bool _showRightEyebrow = true;
+    [SerializeField] private bool _showLips = true;
+
     private const int _LandmarkCount = 468;
     private readonly List<(int, int)> _connections = new List<(int, int)> {
       // Face Oval
@@ -155,6 +163,9 @@ namespace Mediapipe.Unity
       (409, 291),
     };
 
+    // Mask controlling whether each connection is visible (same order as _connections)
+    private List<bool> _connectionMask;
+
     public override bool isMirrored
     {
       set
@@ -179,6 +190,8 @@ namespace Mediapipe.Unity
     {
       _landmarkListAnnotation.Fill(_LandmarkCount);
       _connectionListAnnotation.Fill(_connections, _landmarkListAnnotation);
+      InitializeConnectionMask();
+      ApplyFeatureToggles();
     }
 
     public void SetLandmarkColor(Color landmarkColor)
@@ -229,6 +242,111 @@ namespace Mediapipe.Unity
     public void Draw(mptcc.NormalizedLandmarks target, bool visualizeZ = false)
     {
       Draw(target.landmarks, visualizeZ);
+    }
+
+    private void ApplyFeatureToggles()
+    {
+      SetConnectionGroupActive("FaceOval", _showFaceOval);
+      SetConnectionGroupActive("LeftEye", _showLeftEye);
+      SetConnectionGroupActive("RightEye", _showRightEye);
+      SetConnectionGroupActive("LeftEyebrow", _showLeftEyebrow);
+      SetConnectionGroupActive("RightEyebrow", _showRightEyebrow);
+      SetConnectionGroupActive("Lips", _showLips);
+    }
+
+    private void OnValidate()
+    {
+      if (_connectionListAnnotation != null && _landmarkListAnnotation != null)
+      {
+        ApplyFeatureToggles();
+      }
+    }
+
+    public void SetConnectionGroupActive(string featureName, bool active)
+    {
+      int startIndex = 0;
+      int endIndex = 0;
+
+      switch (featureName)
+      {
+        case "FaceOval":
+          startIndex = 0;
+          endIndex = 36;
+          break;
+        case "LeftEye":
+          startIndex = 36;
+          endIndex = 52;
+          break;
+        case "LeftEyebrow":
+          startIndex = 52;
+          endIndex = 60;
+          break;
+        case "RightEye":
+          startIndex = 60;
+          endIndex = 76;
+          break;
+        case "RightEyebrow":
+          startIndex = 76;
+          endIndex = 84;
+          break;
+        case "Lips":
+          startIndex = 84;
+          endIndex = 104;
+          break;
+        default:
+          return;
+      }
+
+      SetConnectionsActive(startIndex, endIndex, active);
+    }
+
+    private void SetConnectionsActive(int startIndex, int endIndex, bool active)
+    {
+        EnsureMaskInitialized();
+
+        int clampedStart = Mathf.Max(0, startIndex);
+        int clampedEnd = Mathf.Min(endIndex, _connections.Count);
+
+        for (int i = clampedStart; i < clampedEnd; i++)
+        {
+            _connectionMask[i] = active;
+        }
+
+        UpdateConnectionsFromMask();
+    }
+
+    private void EnsureMaskInitialized()
+    {
+        if (_connectionMask == null || _connectionMask.Count != _connections.Count)
+        {
+            InitializeConnectionMask();
+        }
+    }
+
+    private void InitializeConnectionMask()
+    {
+        _connectionMask = new List<bool>(_connections.Count);
+        for (int i = 0; i < _connections.Count; i++)
+        {
+            _connectionMask.Add(true);
+        }
+    }
+
+    private void UpdateConnectionsFromMask()
+    {
+        // Build filtered connection list based on mask
+        var filtered = new List<(int, int)>(_connections.Count);
+        for (int i = 0; i < _connections.Count; i++)
+        {
+            if (_connectionMask[i])
+            {
+                filtered.Add(_connections[i]);
+            }
+        }
+
+        // Re-fill and redraw with the filtered connections
+        _connectionListAnnotation.Fill(filtered, _landmarkListAnnotation);
+        _connectionListAnnotation.Redraw();
     }
   }
 }

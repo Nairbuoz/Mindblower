@@ -31,7 +31,7 @@ public class LineRendererToEdge : MonoBehaviour
 
             // Calculate rotation to align with the line direction
             Vector3 direction = (point2 - point1).normalized;
-            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.forward);
 
             // Update particle system shape
             shapeModule.position = transform.InverseTransformPoint(lineRenderer.transform.TransformPoint(center));
