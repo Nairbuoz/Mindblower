@@ -4,9 +4,11 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
+using NetworkPoseSync;
 
 using mptcc = Mediapipe.Tasks.Components.Containers;
 
@@ -27,6 +29,11 @@ namespace Mediapipe.Unity
     [SerializeField] private Texture2D _maskTexture;
     [SerializeField] private Color _color = Color.blue;
     [SerializeField, Range(0, 1)] private float _maskThreshold = 0.9f;
+
+    [Header("Network Pose Sync")]
+    [SerializeField] private UdpPoseSender _udpPoseSender;
+    [SerializeField] private bool _sendPoseLandmarksOverUdp = false;
+    [SerializeField] private bool _networkIsMirrored = false;
 
     private int _maskWidth;
     private int _maskHeight;
@@ -104,6 +111,12 @@ namespace Mediapipe.Unity
 
     public void Draw(IReadOnlyList<mptcc.NormalizedLandmarks> targets, bool visualizeZ = false)
     {
+      if (_sendPoseLandmarksOverUdp && _udpPoseSender != null)
+      {
+        var poses = ConvertToNetPoses(targets);
+        _udpPoseSender.SubmitPoses(poses, _networkIsMirrored);
+      }
+
       if (ActivateFor(targets))
       {
         CallActionForAll(targets, (annotation, target) =>
@@ -181,6 +194,45 @@ namespace Mediapipe.Unity
       {
         if (child != null) { child.SetMaskThreshold(threshold); }
       }
+    }
+
+    private static NetPose[] ConvertToNetPoses(IReadOnlyList<mptcc.NormalizedLandmarks> targets)
+    {
+      if (targets == null)
+      {
+        return Array.Empty<NetPose>();
+      }
+
+      var poses = new NetPose[targets.Count];
+
+      for (int poseIndex = 0; poseIndex < targets.Count; poseIndex++)
+      {
+        var sourcePose = targets[poseIndex];
+        var sourceLandmarks = sourcePose.landmarks;
+
+        int landmarkCount = sourceLandmarks != null ? sourceLandmarks.Count : 0;
+        var netPose = new NetPose(landmarkCount);
+
+        for (int landmarkIndex = 0; landmarkIndex < landmarkCount; landmarkIndex++)
+        {
+          var sourceLandmark = sourceLandmarks[landmarkIndex];
+
+          float visibility = sourceLandmark.visibility.HasValue
+            ? sourceLandmark.visibility.Value
+            : 1.0f;
+
+          netPose.landmarks[landmarkIndex] = new NetLandmark(
+            sourceLandmark.x,
+            sourceLandmark.y,
+            sourceLandmark.z,
+            visibility
+          );
+        }
+
+        poses[poseIndex] = netPose;
+      }
+
+      return poses;
     }
   }
 }

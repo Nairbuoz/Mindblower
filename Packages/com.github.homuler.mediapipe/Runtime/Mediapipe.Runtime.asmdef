@@ -1,7 +1,7 @@
 {
     "name": "Mediapipe.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": ["NetworkPoseSync"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

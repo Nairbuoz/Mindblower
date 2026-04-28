@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_CORE/MindBlownModule/Scenes/BodyBlowerSender.unity
+    guid: d863acd8b6381b8419ac1daef245ad0b
+  - enabled: 1
+    path: Assets/_CORE/MindBlownModule/Scenes/BodyBlowerReciever.unity
+    guid: 3177be50502dbb04e835c59af514f844
+  - enabled: 0
     path: Assets/_CORE/MindBlownModule/Scenes/MindblowerWithMask.unity
     guid: 4fa3d73c63e906b41bb82958f2d10be3
   - enabled: 0
