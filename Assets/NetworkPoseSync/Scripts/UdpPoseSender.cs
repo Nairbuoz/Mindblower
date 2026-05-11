@@ -101,6 +101,12 @@ namespace NetworkPoseSync
       SubmitPoses(poses, isMirrored);
     }
 
+    public void UpdateIP(string newIp)
+    {
+      remoteIp = newIp;
+      ValidateEndpoint();
+    }
+
     private void SendCurrent()
     {
       if (_currentPoses == null) return;
